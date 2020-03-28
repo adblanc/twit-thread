@@ -5,41 +5,43 @@ export default class Trimmer {
     this.maxLength = maxLength;
   }
 
-  trim = (text: string): string[] => {
-    const result: string[] = [];
+  trim = (textArr: string[]): string[] => {
+    const [text, ...rest] = textArr;
+    if (!text) return [];
 
-    while (this.isGreaterThanMaxLength(text)) {
+    return [...this.trimText(text), ...this.trim(rest)];
+  };
+
+  private trimText = (text: string): string[] => {
+    if (this.isGreaterThanMaxLength(text)) {
       const sepIndex = this.getSeparationIndex(text);
       const trimmed = text.substring(0, sepIndex);
-      result.push(trimmed);
-      text = text.substring(sepIndex);
+      return [trimmed, ...this.trimText(text.substring(sepIndex))];
     }
-
-    result.push(text);
-
-    return result;
+    return [text];
   };
 
-  isSmallerOrEqualThanMaxLength = (text: string): boolean =>
-    text.length <= this.maxLength;
-
-  isGreaterThanMaxLength = (text: string): boolean =>
-    !this.isSmallerOrEqualThanMaxLength(text);
+  private isGreaterThanMaxLength = (text: string): boolean =>
+    text.length > this.maxLength;
 
   private getSeparationIndex = (text: string): number => {
-    const index = this.findLeftSpace(text);
+    let endIndex = this.getEndIndex(text);
+    if (this.isSpace(text.charAt(endIndex))) return endIndex;
 
-    if (index <= 0) return this.getEndIndex(text);
-
-    return index;
-  };
-
-  private findLeftSpace = (text: string): number => {
-    const end = this.getEndIndex(text);
-
-    return text.substring(0, end).lastIndexOf(" ");
+    const spaceIndex = this.findLeftSpace(text, endIndex);
+    if (spaceIndex > 0) {
+      endIndex = spaceIndex + 1;
+    }
+    return endIndex;
   };
 
   private getEndIndex = (text: string): number =>
-    text.length > this.maxLength ? this.maxLength : text.length;
+    this.isGreaterThanMaxLength(text) ? this.maxLength : text.length;
+
+  private isSpace = (text: string): boolean => text === " ";
+
+  private findLeftSpace = (text: string, end: number): number => {
+    const spaceIndex = text.substring(0, end).lastIndexOf(" ");
+    return spaceIndex;
+  };
 }
