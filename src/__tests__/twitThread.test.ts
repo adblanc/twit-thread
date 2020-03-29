@@ -26,7 +26,7 @@ describe("TwitThread", () => {
         expect.assertions(1);
         try {
           const t = new TwitThread(fakeConfig);
-          const textOverLength = randomString() + "a".repeat(281);
+          const textOverLength = randomString(5) + "a".repeat(281);
 
           await t.tweet(textOverLength);
         } catch (e) {
@@ -36,7 +36,7 @@ describe("TwitThread", () => {
 
       it("should tweet and return an id", async () => {
         const t = new TwitThread(validConfig);
-        const text = randomString();
+        const text = randomString(5);
 
         const mockTweet = jest
           .spyOn(t, "tweet")
@@ -58,7 +58,7 @@ describe("TwitThread", () => {
     describe("tweetThread", () => {
       it("should tweet a thread and return the thread as it was if not trimmed", async () => {
         const tweetNbr = 4;
-        const text = randomString();
+        const text = randomString(5);
         const initialTexts = [...new Array(tweetNbr)].map(() => text);
         const t = new TwitThread(fakeConfig);
         const mockTweet = jest
@@ -133,7 +133,7 @@ describe("TwitThread", () => {
     it("should tweet and return valid tweet id", async () => {
       expect.assertions(2);
       const t = new TwitThread(validConfig);
-      const text = randomString();
+      const text = randomString(5);
 
       const id = await t.tweet(text);
 
@@ -144,20 +144,25 @@ describe("TwitThread", () => {
       expect.assertions(1);
       const t = new TwitThread(validConfig);
       const tweetNbr = 3;
-      const text = randomString();
+      const text = randomString(5);
       const initialTexts = [...new Array(tweetNbr)].map(() => text);
 
       const texts = await t.tweetThread(initialTexts);
       expect(texts).toMatchObject(initialTexts);
     });
     it("should tweet a thread and return the thread trimmed if some strings were overlengthed", async () => {
-      expect.assertions(1);
+      expect.assertions(4);
       const t = new TwitThread(validConfig);
       const tweetNbr = 2;
-      const initialTexts = [...new Array(tweetNbr)].map(() => "a".repeat(281));
+      const initialTexts = [...new Array(tweetNbr)].map(() =>
+        randomString(281)
+      );
       const texts = await t.tweetThread(initialTexts);
 
-      expect(texts).toMatchObject(["a".repeat(280), "a", "a".repeat(280), "a"]);
+      expect(texts[0]).toHaveLength(280);
+      expect(texts[1]).toHaveLength(1);
+      expect(texts[2]).toHaveLength(280);
+      expect(texts[3]).toHaveLength(1);
     });
   });
 });

@@ -1,7 +1,2 @@
-export const randomString = (): string =>
-  Math.random()
-    .toString(36)
-    .substring(2, 15) +
-  Math.random()
-    .toString(36)
-    .substring(2, 15);
+export const randomString = (length: number): string =>
+  [...Array(length)].map(() => (~~(Math.random() * 36)).toString(36)).join("");
