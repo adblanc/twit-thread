@@ -29,7 +29,7 @@
 <!-- PROJECT LOGO -->
 <br />
 
-  <h3 align="center">Twit Thread</h3>
+  <h2 align="center">Twit Thread</h2>
 
   <p align="center">
     Twit Thread is a Node.js module written in Typescript that add utility functions to 
@@ -94,8 +94,11 @@ const config = {
 }
 async function tweetThread() {
    const t = new TwitThread(config);
+   
    await t.tweetThread(["hey 1/3", "this is a thread 2/3", "bye 3/3"]);
 }
+
+tweetThread();
 ```
 Will produce the following :
 
@@ -116,6 +119,8 @@ TEST_access_token=xxxx
 TEST_access_token_secret=xxxx
 ```
 You can add a .env file at the root of the folder as we're using [dotenv module](https://github.com/motdotla/dotenv)
+
+/!\Be aware that those precise tests will produce tweets and therefore might pollute the twitter account you've setup.
 
 <!-- CONTRIBUTING -->
 ## Contributing
