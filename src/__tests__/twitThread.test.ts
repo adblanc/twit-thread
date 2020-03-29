@@ -2,7 +2,7 @@ import TwitThread from "..";
 import { fakeConfig, validConfig } from "../tests-utils/configs";
 import { ERROR_TWEET_LENGTH } from "../constants/errors";
 import { randomString } from "../tests-utils/helpers";
-import Trimmer from "../../Trimmer";
+import Trimmer from "../Trimmer";
 import { TWEET_MAX_LENGTH } from "../constants/tweetMax";
 
 describe("TwitThread", () => {

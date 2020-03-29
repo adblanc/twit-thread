@@ -1,6 +1,6 @@
 require("dotenv").config();
 import Twit from "twit";
-import Trimmer from "../Trimmer";
+import Trimmer from "./Trimmer";
 import { TWEET_MAX_LENGTH, TWEET_ROUTE } from "./constants/tweetMax";
 import { IncomingMessage } from "http";
 import { ERROR_TWEET_LENGTH } from "./constants/errors";
