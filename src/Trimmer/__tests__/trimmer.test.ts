@@ -1,4 +1,4 @@
-import Trimmer from "../Trimmer";
+import Trimmer from "..";
 
 describe("Trimmer", () => {
   describe("public method trim", () => {
