@@ -1,8 +1,24 @@
 {
   "name": "twit-thread",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "This module allows you to tweet as a thread using Twit wrapper API. If any of the strings passed to the function tweetThread is greater than max characters allowed per tweet by twitter (280 at the moment), the function will truncate those and proceed making an ordered thread from those.",
+  "main": "lib/index.js",
+  "keywords": [
+    "twitter",
+    "thread",
+    "twitter bot",
+    "typescript twitter"
+  ],
+  "author": "Blanc Adrien",
   "license": "MIT",
+  "repository": {
+    "url": "git+https://github.com/adblanc/twit-thread.git",
+    "type": "git"
+  },
+  "bugs": {
+    "url": "https://github.com/adblanc/twit-thread/issues"
+  },
+  "homepage": "https://github.com/adblanc/twit-thread#readme",
   "devDependencies": {
     "@types/jest": "^25.1.4",
     "@types/node": "^13.9.5",
@@ -20,12 +36,12 @@
     "twit": "^2.2.11"
   },
   "scripts": {
-    "prepublishOnly": "tsc",
+    "prepublishOnly": "yarn build",
     "dev": "ts-node-dev --respawn src/index.ts",
     "start": "ts-node-dev src/index.ts",
-    "build": "tsc",
+    "build": "tsc -p tsconfig-build.json",
     "test": "jest --coverage ",
-    "createPackage": "tsc && npm pack",
+    "createPackage": "yarn build && npm pack",
     "lint": "yarn eslint . --ext .js,.jsx,.ts,.tsx"
   }
 }
