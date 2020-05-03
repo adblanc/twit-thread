@@ -25,7 +25,7 @@
 [![Build][build-shield]][build-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
-
+[![Coverage Status](https://coveralls.io/repos/github/adblanc/twit-thread/badge.svg?branch=master)](https://coveralls.io/github/adblanc/twit-thread?branch=master)
 <!-- PROJECT LOGO -->
 <br />
 
