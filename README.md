@@ -82,6 +82,8 @@ npm install twit-thread
 ## Usage
 
 ```js
+const { TwitThread } = require("twit-thread");
+
 const config = {
   consumer_key:         '...',
   consumer_secret:      '...',
