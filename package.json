@@ -28,6 +28,7 @@
     "@types/twit": "^2.2.23",
     "@typescript-eslint/eslint-plugin": "^2.25.0",
     "@typescript-eslint/parser": "^2.25.0",
+    "coveralls": "^3.1.0",
     "eslint": "^6.8.0",
     "jest": "^25.2.3",
     "ts-jest": "^25.2.1",
@@ -45,6 +46,7 @@
     "build": "tsc -p tsconfig-build.json",
     "test": "jest --coverage ",
     "createPackage": "yarn build && yarn pack",
-    "lint": "yarn eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "yarn eslint . --ext .js,.jsx,.ts,.tsx",
+    "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls"
   }
 }
