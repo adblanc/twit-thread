@@ -1,9 +1,9 @@
-import TwitThread from "..";
-import { fakeConfig, validConfig } from "../tests-utils/configs";
-import { ERROR_TWEET_LENGTH } from "../constants/errors";
-import { randomString } from "../tests-utils/helpers";
-import Trimmer from "../Trimmer";
-import { TWEET_MAX_LENGTH } from "../constants/tweetMax";
+import { fakeConfig, validConfig } from "../../../tests-utils/configs";
+import { ERROR_TWEET_LENGTH } from "../../../constants/errors";
+import { randomString } from "../../../tests-utils/helpers";
+import Trimmer from "../../Trimmer";
+import { TWEET_MAX_LENGTH } from "../../../constants/tweetMax";
+import { TwitThread } from "..";
 
 describe("TwitThread", () => {
   it("should construct properly", () => {
@@ -41,7 +41,7 @@ describe("TwitThread", () => {
         const mockTweet = jest
           .spyOn(t, "tweet")
           .mockImplementation((text: string) => {
-            return new Promise(res => {
+            return new Promise((res) => {
               return res("id" + text);
             });
           });
@@ -64,15 +64,15 @@ describe("TwitThread", () => {
         const mockTweet = jest
           .spyOn(t, "tweet")
           .mockImplementation((text: string) => {
-            return new Promise(res => res("id" + text));
+            return new Promise((res) => res("id" + text));
           });
         const mockTweetThread = jest
           .spyOn(t, "tweetThread")
           .mockImplementation((texts: string[]) => {
-            texts.forEach(text => t.tweet(text));
+            texts.forEach((text) => t.tweet(text));
 
             const trimmer = new Trimmer(TWEET_MAX_LENGTH);
-            return new Promise(res => res(trimmer.trim(texts)));
+            return new Promise((res) => res(trimmer.trim(texts)));
           });
 
         expect.assertions(tweetNbr + 5);
@@ -99,16 +99,16 @@ describe("TwitThread", () => {
         const mockTweet = jest
           .spyOn(t, "tweet")
           .mockImplementation((text: string) => {
-            return new Promise(res => res("id" + text));
+            return new Promise((res) => res("id" + text));
           });
         const mockTweetThread = jest
           .spyOn(t, "tweetThread")
           .mockImplementation((texts: string[]) => {
             const trimmer = new Trimmer(TWEET_MAX_LENGTH);
             const trimmed = trimmer.trim(texts);
-            trimmed.forEach(text => t.tweet(text));
+            trimmed.forEach((text) => t.tweet(text));
 
-            return new Promise(res => res(trimmed));
+            return new Promise((res) => res(trimmed));
           });
 
         const texts = await t.tweetThread(initialTexts);
@@ -123,7 +123,7 @@ describe("TwitThread", () => {
           "a".repeat(280),
           "a",
           "a".repeat(280),
-          "a"
+          "a",
         ]);
       });
     });

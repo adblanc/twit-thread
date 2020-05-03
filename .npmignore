@@ -1,0 +1,8 @@
+lib/
+coverage
+images
+.circleci
+node_modules
+images
+.env
+jest.config.js

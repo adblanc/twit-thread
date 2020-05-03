@@ -41,7 +41,7 @@
     "start": "ts-node-dev src/index.ts",
     "build": "tsc -p tsconfig-build.json",
     "test": "jest --coverage ",
-    "createPackage": "yarn build && npm pack",
+    "createPackage": "yarn build && yarn pack",
     "lint": "yarn eslint . --ext .js,.jsx,.ts,.tsx"
   }
 }
