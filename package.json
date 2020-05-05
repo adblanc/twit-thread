@@ -1,6 +1,6 @@
 {
   "name": "twit-thread",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "This module allows you to tweet as a thread using Twit wrapper API. If any of the strings passed to the function tweetThread is greater than max characters allowed per tweet by twitter (280 at the moment), the function will truncate those and proceed making an ordered thread from those.",
   "main": "lib/index.js",
   "files": [
