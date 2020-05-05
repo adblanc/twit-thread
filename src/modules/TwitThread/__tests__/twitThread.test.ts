@@ -105,14 +105,14 @@ describe("TwitThread", () => {
           .spyOn(t, "tweet")
           .mockImplementation((text: string) => {
             return new Promise((res) => {
-              return res("id" + text);
+              text;
+              return res(undefined);
             });
           });
 
-        const id = await t.tweet(text);
+        const data = await t.tweet(text);
 
-        expect(id).toBeDefined();
-        expect(id.length).toBeGreaterThan(0);
+        expect(data).toBeUndefined();
         expect(mockTweet).toHaveBeenCalledWith(text);
         expect(mockTweet).toHaveBeenCalledTimes(1);
       });
@@ -127,24 +127,23 @@ describe("TwitThread", () => {
         const mockTweet = jest
           .spyOn(t, "tweet")
           .mockImplementation((text: string) => {
-            return new Promise((res) => res("id" + text));
+            text;
+            return new Promise((res) => res(undefined));
           });
         const mockTweetThread = jest
           .spyOn(t, "tweetThread")
           .mockImplementation((tweets: Thread) => {
             tweets.forEach((tweet) => t.tweet(tweet.text));
 
-            const trimmer = new Trimmer(TWEET_MAX_LENGTH);
             return new Promise((res) =>
-              res(trimmer.trim(tweets.map((tweet) => tweet.text)))
+              //@ts-ignore
+              res([undefined])
             );
           });
 
-        expect.assertions(tweetNbr + 5);
+        expect.assertions(tweetNbr + 4);
 
-        const texts = await t.tweetThread(
-          initialTexts.map((text) => ({ text }))
-        );
+        await t.tweetThread(initialTexts.map((text) => ({ text })));
 
         expect(mockTweetThread).toHaveBeenCalledWith(
           initialTexts.map((text) => ({ text }))
@@ -155,11 +154,10 @@ describe("TwitThread", () => {
           expect(mockTweet).toHaveBeenNthCalledWith(i + 1, initialTexts[i]);
         }
         expect(mockTweet).toHaveBeenLastCalledWith(initialTexts[tweetNbr - 1]);
-        expect(texts).toMatchObject(initialTexts);
       });
 
       it("should tweet a thread and return the thread trimmed if some strings were overlengthed", async () => {
-        expect.assertions(7);
+        expect.assertions(6);
         const tweetNbr = 2;
         const initialTexts = [...new Array(tweetNbr)].map(() =>
           "a".repeat(281)
@@ -168,7 +166,8 @@ describe("TwitThread", () => {
         const mockTweet = jest
           .spyOn(t, "tweet")
           .mockImplementation((text: string) => {
-            return new Promise((res) => res("id" + text));
+            text;
+            return new Promise((res) => res(undefined));
           });
         const mockTweetThread = jest
           .spyOn(t, "tweetThread")
@@ -176,13 +175,11 @@ describe("TwitThread", () => {
             const trimmer = new Trimmer(TWEET_MAX_LENGTH);
             const trimmed = trimmer.trim(thread.map((t) => t.text));
             trimmed.forEach((text) => t.tweet(text));
-
-            return new Promise((res) => res(trimmed));
+            //@ts-ignore
+            return new Promise((res) => res([undefined]));
           });
 
-        const texts = await t.tweetThread(
-          initialTexts.map((text) => ({ text }))
-        );
+        await t.tweetThread(initialTexts.map((text) => ({ text })));
 
         expect(mockTweetThread).toHaveBeenCalledWith(
           initialTexts.map((text) => ({ text }))
@@ -192,12 +189,6 @@ describe("TwitThread", () => {
         expect(mockTweet).toHaveBeenNthCalledWith(2, "a");
         expect(mockTweet).toHaveBeenNthCalledWith(3, "a".repeat(280));
         expect(mockTweet).toHaveBeenNthCalledWith(4, "a");
-        expect(texts).toMatchObject([
-          "a".repeat(280),
-          "a",
-          "a".repeat(280),
-          "a",
-        ]);
       });
     });
   });
@@ -208,23 +199,29 @@ describe("TwitThread", () => {
       const t = new TwitThread(validConfig);
       const text = randomString(5);
 
-      const id = await t.tweet(text);
+      const data = await t.tweet(text);
 
-      expect(id).toBeDefined();
-      expect(id.length).toBeGreaterThan(0);
+      expect(data).toBeDefined();
+      expect(data.id_str.length).toBeGreaterThan(0);
     });
     it("should tweet a thread and return the thread as it was if not trimmed", async () => {
-      expect.assertions(1);
+      expect.assertions(4);
       const t = new TwitThread(validConfig);
       const tweetNbr = 3;
       const text = randomString(5);
       const initialTexts = [...new Array(tweetNbr)].map(() => text);
 
-      const texts = await t.tweetThread(initialTexts.map((text) => ({ text })));
-      expect(texts).toMatchObject(initialTexts);
+      const tweets = await t.tweetThread(
+        initialTexts.map((text) => ({ text }))
+      );
+      expect(tweets.length).toBe(tweetNbr);
+
+      tweets.forEach((tweet) => {
+        expect(tweet.id_str.length).toBeGreaterThan(0);
+      });
     });
     it("should tweet a thread and return the thread trimmed if some strings were overlengthed", async () => {
-      expect.assertions(4);
+      expect.assertions(8);
       const t = new TwitThread(validConfig);
       const tweetNbr = 2;
       const initialTexts = [...new Array(tweetNbr)].map(() =>
@@ -232,10 +229,17 @@ describe("TwitThread", () => {
       );
       const texts = await t.tweetThread(initialTexts.map((text) => ({ text })));
 
-      expect(texts[0]).toHaveLength(280);
-      expect(texts[1]).toHaveLength(1);
-      expect(texts[2]).toHaveLength(280);
-      expect(texts[3]).toHaveLength(1);
+      expect(texts[0].text).toHaveLength(140);
+      expect(texts[0].truncated).toBeTruthy();
+
+      expect(texts[1].text).toHaveLength(1);
+      expect(texts[1].truncated).toBeFalsy();
+
+      expect(texts[2].text).toHaveLength(140);
+      expect(texts[2].truncated).toBeTruthy();
+
+      expect(texts[3].text).toHaveLength(1);
+      expect(texts[3].truncated).toBeFalsy();
     });
   });
 });

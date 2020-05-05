@@ -21,7 +21,10 @@ interface TweetThread {
 
 export type Thread = TweetThread[];
 
-type TweetFn = (text: string, options?: Twit.Params) => Promise<string>;
+type TweetFn = (
+  text: string,
+  options?: Twit.Params
+) => Promise<Twit.Twitter.Status>;
 
 export class TwitThread extends Twit {
   private trimmer: Trimmer;
@@ -31,20 +34,27 @@ export class TwitThread extends Twit {
     this.trimmer = new Trimmer(TWEET_MAX_LENGTH);
   }
 
-  public tweetThread = async (thread: Thread): Promise<string[]> => {
+  public tweetThread = async (
+    thread: Thread
+  ): Promise<Twit.Twitter.Status[]> => {
     const trimmedTweets = this.trimmer.trim(thread.map((tweet) => tweet.text));
 
     const tweets = this.matchParamsToTweets(thread, trimmedTweets);
 
+    const result: Twit.Twitter.Status[] = [];
+
     let options: Twit.Params = {};
+
     for (let i = 0; i < tweets.length; i++) {
       options = {
         in_reply_to_status_id: options.in_reply_to_status_id,
         ...tweets[i].options,
       };
-      options.in_reply_to_status_id = await this.tweet(tweets[i].text, options);
+      const data = await this.tweet(tweets[i].text, options);
+      options.in_reply_to_status_id = data.id_str;
+      result.push(data);
     }
-    return trimmedTweets;
+    return result;
   };
 
   public tweet: TweetFn = async (text, options) => {
@@ -67,7 +77,7 @@ export class TwitThread extends Twit {
       media_data: undefined,
     })) as TweetResponse;
 
-    return data.id_str;
+    return data;
   };
 
   private matchParamsToTweets = (
