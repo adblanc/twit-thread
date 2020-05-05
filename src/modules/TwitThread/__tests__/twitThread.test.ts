@@ -1,9 +1,12 @@
+import fs from "fs";
+import path from "path";
+
 import { fakeConfig, validConfig } from "../../../tests-utils/configs";
 import { ERROR_TWEET_LENGTH } from "../../../constants/errors";
 import { randomString } from "../../../tests-utils/helpers";
 import Trimmer from "../../Trimmer";
 import { TWEET_MAX_LENGTH } from "../../../constants/tweetMax";
-import { TwitThread } from "..";
+import { TwitThread, Thread } from "..";
 
 describe("TwitThread", () => {
   it("should construct properly", () => {
@@ -18,6 +21,66 @@ describe("TwitThread", () => {
     expect(t.stream).toBeDefined();
     expect(t.tweet).toBeDefined();
     expect(t.tweetThread).toBeDefined();
+  });
+
+  describe("matchParamsToTweet", () => {
+    it("should keep every params if no trims needed", () => {
+      const t = new TwitThread(fakeConfig);
+
+      const tweets = t["matchParamsToTweets"](
+        [
+          { text: "123", options: { media_data: "salut123" } },
+          { text: "456", options: { media_data: "salut456" } },
+        ],
+        ["123", "456"]
+      );
+
+      expect(tweets.length).toBe(2);
+      expect(tweets[0].text).toBe("123");
+      expect(tweets[0].options?.media_data).toBe("salut123");
+      expect(tweets[1].text).toBe("456");
+      expect(tweets[1].options?.media_data).toBe("salut456");
+    });
+
+    it("should no apply options to other parts of trimmed tweet", () => {
+      const t = new TwitThread(fakeConfig);
+
+      const tweets = t["matchParamsToTweets"](
+        [
+          { text: "a".repeat(281), options: { media_data: "a" } },
+          { text: "b", options: { media_data: "b" } },
+        ],
+        ["a".repeat(280), "a", "b"]
+      );
+
+      expect(tweets.length).toBe(3);
+      expect(tweets[0].text).toBe("a".repeat(280));
+      expect(tweets[0].options?.media_data).toBe("a");
+      expect(tweets[1].text).toBe("a");
+      expect(tweets[1].options).not.toBeDefined();
+      expect(tweets[2].text).toBe("b");
+      expect(tweets[2].options?.media_data).toBe("b");
+    });
+  });
+
+  describe("with medias", () => {
+    it("should post a media with first tweet of the thread", async () => {
+      const t = new TwitThread(validConfig);
+
+      await t.tweetThread([
+        {
+          text: "ceci est un test" + randomString(5),
+          options: {
+            media_data: fs.readFileSync(
+              path.join(__dirname, "../../../../images/screenshot.png"),
+              {
+                encoding: "base64",
+              }
+            ),
+          },
+        },
+      ]);
+    });
   });
 
   describe("mocked", () => {
@@ -68,18 +131,24 @@ describe("TwitThread", () => {
           });
         const mockTweetThread = jest
           .spyOn(t, "tweetThread")
-          .mockImplementation((texts: string[]) => {
-            texts.forEach((text) => t.tweet(text));
+          .mockImplementation((tweets: Thread) => {
+            tweets.forEach((tweet) => t.tweet(tweet.text));
 
             const trimmer = new Trimmer(TWEET_MAX_LENGTH);
-            return new Promise((res) => res(trimmer.trim(texts)));
+            return new Promise((res) =>
+              res(trimmer.trim(tweets.map((tweet) => tweet.text)))
+            );
           });
 
         expect.assertions(tweetNbr + 5);
 
-        const texts = await t.tweetThread(initialTexts);
+        const texts = await t.tweetThread(
+          initialTexts.map((text) => ({ text }))
+        );
 
-        expect(mockTweetThread).toHaveBeenCalledWith(initialTexts);
+        expect(mockTweetThread).toHaveBeenCalledWith(
+          initialTexts.map((text) => ({ text }))
+        );
         expect(mockTweetThread).toHaveBeenCalledTimes(1);
         expect(mockTweet).toHaveBeenCalledTimes(tweetNbr);
         for (let i = 0; i < tweetNbr; i++) {
@@ -103,17 +172,21 @@ describe("TwitThread", () => {
           });
         const mockTweetThread = jest
           .spyOn(t, "tweetThread")
-          .mockImplementation((texts: string[]) => {
+          .mockImplementation((thread: Thread) => {
             const trimmer = new Trimmer(TWEET_MAX_LENGTH);
-            const trimmed = trimmer.trim(texts);
+            const trimmed = trimmer.trim(thread.map((t) => t.text));
             trimmed.forEach((text) => t.tweet(text));
 
             return new Promise((res) => res(trimmed));
           });
 
-        const texts = await t.tweetThread(initialTexts);
+        const texts = await t.tweetThread(
+          initialTexts.map((text) => ({ text }))
+        );
 
-        expect(mockTweetThread).toHaveBeenCalledWith(initialTexts);
+        expect(mockTweetThread).toHaveBeenCalledWith(
+          initialTexts.map((text) => ({ text }))
+        );
         expect(mockTweetThread).toHaveBeenCalledTimes(1);
         expect(mockTweet).toHaveBeenNthCalledWith(1, "a".repeat(280));
         expect(mockTweet).toHaveBeenNthCalledWith(2, "a");
@@ -147,7 +220,7 @@ describe("TwitThread", () => {
       const text = randomString(5);
       const initialTexts = [...new Array(tweetNbr)].map(() => text);
 
-      const texts = await t.tweetThread(initialTexts);
+      const texts = await t.tweetThread(initialTexts.map((text) => ({ text })));
       expect(texts).toMatchObject(initialTexts);
     });
     it("should tweet a thread and return the thread trimmed if some strings were overlengthed", async () => {
@@ -157,7 +230,7 @@ describe("TwitThread", () => {
       const initialTexts = [...new Array(tweetNbr)].map(() =>
         randomString(281)
       );
-      const texts = await t.tweetThread(initialTexts);
+      const texts = await t.tweetThread(initialTexts.map((text) => ({ text })));
 
       expect(texts[0]).toHaveLength(280);
       expect(texts[1]).toHaveLength(1);
