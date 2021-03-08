@@ -94,7 +94,7 @@ async function tweetThreadWithImage() {
   await t.tweetThread([
     {
       text: "hey 1/3",
-      options: { media_data: fs.readFileSync("./screenshot.png") },
+      options: { media_data: fs.readFileSync("./screenshot.png", { encoding: "base64" })},
     },
     { text: "this is a thread 2/3" },
     { text: "bye 3/3" },
