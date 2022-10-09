@@ -61,19 +61,25 @@ export class TwitThread extends Twit {
     if (text.length > TWEET_MAX_LENGTH)
       return new Promise((res, rej) => rej(ERROR_TWEET_LENGTH));
 
-    let mediaData: any = undefined;
+    let mediaIds: string;
 
     if (options?.media_data) {
       const { data }: any = await this.post(MEDIA_UPLOAD_ROUTE, {
         media_data: options.media_data,
       });
-      mediaData = data.media_id_string;
+      mediaIds = data.media_id_string;
+    }
+    
+    // media_ids will be a comma-delimited list of ids as per the twitter docs https://developer.twitter.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-statuses-update
+    if (options?.media_ids?.trim() !== "") {
+      // check if mediaIds already as an id or not, if it has, we need to append a comma
+      mediaIds = mediaIds.trim() !== "" ? `,${options.media_ids}` : options.media_ids;
     }
 
     const { data } = (await this.post(TWEET_ROUTE, {
       ...options,
       status: text,
-      media_ids: mediaData ? [mediaData] : [],
+      media_ids: mediaIds,
       media_data: undefined,
     })) as TweetResponse;
 
